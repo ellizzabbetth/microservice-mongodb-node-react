@@ -1,7 +1,10 @@
 Remove all stopped containers
     docker container prune
 
+-----------------
 DOCKERIZE MONGODB
+-----------------
+
 
 Use official mongo image.
 
@@ -27,21 +30,36 @@ The backend node app connects to Mongodb container rather than locally installed
 
 See local nodejs application
 
-DOCKERIZE NODE APP
 
+------------------
+DOCKERIZE NODE APP
+------------------
+
+
+There is no official Docker Hub image for our own custom application. So we need to write our own Docker file to build our own image for this project.
+
+Remove all unused images I have on my system
+    docker image prune -a
+
+
+Build image <image-name>= goals-node
+    docker build -t goals-node .
+
+Run a container based on the newly created image:
+    docker run --name goals-backend --rm goals-node
 
 But it crashes because we have MONGODB running in a container exposing its port, but in the dockerized node backend application I am reaching out to localhost.
-And that now, since this application is now inside of a container,
-means that I'm trying to access some other service on this port inside of that same backend container, not on my host machine. You'll learn about that in the networking module. And there you'll also learn how you can solve that.
-
-There is a special alternative domain or address,
-which you should use here and that's host.docker.internal.
-That's a special address, a special identifier, which is translated to your real local host machine IP by Docker.
+  'mongodb://localhost:27017/course-goals',
+And that now, since this application is now inside of a container, means that I'm trying to access some other service on this port inside of that same backend container, 
+not on my host machine. You'll learn about that in the networking module. And there you'll also learn how you can solve that. There is a special alternative domain or address,
+which you should use here and that's host.docker.internal. That's a special address, a special identifier, which is translated to your real local host machine IP by Docker.
 
 Rebuild image since the sourcecode changed.
+    docker build -t goals-node .
 Run container again
+    docker run --name goals-backend --rm goals-node
 
-disconnected to Monogdb log message indicates tha node did connect.
+CONNECTED TO MONGODB log message indicates tha node did connect.
 So our backend is now dockerized. It is in it's container and able to talk
 to mongodb.
 
@@ -57,6 +75,7 @@ BACKEND:
     docker run --name goals-backend --rm goals-node
     docker stop goals-backend
     docker run --name goals-backend --rm -d -p 80:80 goals-node
+    docker run --name goals-backend  --add-host=host.docker.internal:172.17.0.1 --rm goals-node
 
 And now the React application, which currently is not dockerized yet, will be able to talk to this backend. So now two of three parts are dockerized only the frontend is missing.
 
@@ -103,13 +122,28 @@ docker build -t goals-node .
 
 docker run --name goals-backend --rm -d -p 80:80 goals-node
 docker run --name goals-backend --rm -d --network goals-net goals-node
-
+docker run --name goals-frontend --rm -p 3000:3000 goals-react
 
 
 docker network ls
 docker ps -a
 
+--------
 FRONTEND
+-------
+Rebuild image 
+docker build -t goals-react .
+
+docker run --name goals-frontend --rm -d -p 3000:3000 goals-react
+
+To Troubleshoot run in attached mode:
+docker run --name goals-frontend --rm -p 3000:3000 goals-react
+
+
+Solution : -it
+docker run --name goals-frontend --rm -p 3000:3000 -it goals-react
+
+-------------------------
 
 In all the places in the frontend sourcecode where we reach out to
 localhost we need to be the name of my nodes application container:
@@ -118,7 +152,7 @@ localhost we need to be the name of my nodes application container:
 Rebuild image 
 docker build -t goals-react .
 
-docker run --name goals-frontent --network goals-net --rm -p 3000:3000 -it goals-react
+docker run --name goals-frontend --network goals-net --rm -p 3000:3000 -it goals-react
 
 
 I still want to publish my port here because I still also want to interact with this app from my local host machine, so that we can test it in the browser here.
