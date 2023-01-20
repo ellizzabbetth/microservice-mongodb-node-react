@@ -140,10 +140,12 @@ To Troubleshoot run in attached mode:
 docker run --name goals-frontend --rm -p 3000:3000 goals-react
 
 
-Solution : -it
+Solution : add -it
 docker run --name goals-frontend --rm -p 3000:3000 -it goals-react
 
--------------------------
+
+
+
 
 In all the places in the frontend sourcecode where we reach out to
 localhost we need to be the name of my nodes application container:
@@ -209,3 +211,11 @@ But I also still want to publish port 80 on port 80 on the localhost machine,
 so that our separate react application is able to talk to that.
 
 3 containers up and running & talking to each other.
+
+
+-------------------------
+ADDING DOCKER NETWORKS
+------------------------
+docker network create goals-net
+
+
